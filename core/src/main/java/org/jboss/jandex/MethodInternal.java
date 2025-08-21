@@ -30,9 +30,10 @@ import java.util.List;
 final class MethodInternal {
     static final MethodInternal[] EMPTY_ARRAY = new MethodInternal[0];
     static final NameAndParameterComponentComparator NAME_AND_PARAMETER_COMPONENT_COMPARATOR = new NameAndParameterComponentComparator();
+    static final NameAndParameterComponentComparator WRITE_SORT_COMPARATOR = new WriteSortComparator();
     static final byte[][] EMPTY_PARAMETER_NAMES = new byte[0][];
 
-    private static final class NameAndParameterComponentComparator implements Comparator<MethodInternal> {
+    private static class NameAndParameterComponentComparator implements Comparator<MethodInternal> {
         private int compare(byte[] left, byte[] right) {
             for (int i = 0, j = 0; i < left.length && j < right.length; i++, j++) {
                 int a = (left[i] & 0xff);
@@ -75,12 +76,37 @@ final class MethodInternal {
         }
     }
 
+    private static final class WriteSortComparator extends NameAndParameterComponentComparator {
+        @Override
+        public int compare(MethodInternal instance, MethodInternal instance2) {
+            int r = super.compare(instance, instance2);
+            if (r != 0) {
+                return r;
+            }
+            r = Integer.compare(instance.flags, instance2.flags);
+            if (r != 0) {
+                return r;
+            }
+            return 0;
+        }
+    }
+
     // contains fields that are only seldom used, to make the `MethodInternal` class smaller
     private static final class ExtraInfo {
         Type receiverType;
         Type[] typeParameters;
         AnnotationValue defaultValue;
         AnnotationInstance[] annotations;
+
+        @Override
+        public String toString() {
+            return "ExtraInfo{" +
+                    "receiverType=" + receiverType +
+                    ", typeParameters=" + Arrays.toString(typeParameters) +
+                    ", defaultValue=" + defaultValue +
+                    ", annotations=" + Arrays.toString(annotations) +
+                    '}';
+        }
     }
 
     private byte[] name;
