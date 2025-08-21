@@ -21,6 +21,7 @@ package org.jboss.jandex;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -40,9 +41,41 @@ import java.util.function.Function;
  */
 public abstract class Type implements Descriptor {
     public static final Type[] EMPTY_ARRAY = new Type[0];
+    public static final Comparator<Type> TYPE_NAME_WRITE_COMPARATOR = new TypeWriteComparator();
+    public static final Comparator<Type[]> TYPE_ARRAY_NAME_WRITE_COMPARATOR = new TypeArrayNameWriteComparator();
     private static final AnnotationInstance[] EMPTY_ANNOTATIONS = new AnnotationInstance[0];
     private final DotName name;
     private final AnnotationInstance[] annotations;
+
+    private static int compareForWrite(Type instance1, Type instance2) {
+        int r = Integer.compare(instance1.kind().sortOrder, instance2.kind().sortOrder);
+        if (r != 0) {
+            return r;
+        }
+        return instance1.name().compareTo(instance2.name());
+    }
+
+    static class TypeWriteComparator implements Comparator<Type> {
+        public int compare(Type instance1, Type instance2) {
+            return compareForWrite(instance1, instance2);
+        }
+    }
+
+    static class TypeArrayNameWriteComparator implements Comparator<Type[]> {
+        public int compare(Type[] instance1, Type[] instance2) {
+            int l1 = instance1.length;
+            int l2 = instance2.length;
+            for (int i = 0; i < l1 && i < l2; i++) {
+                Type i1 = instance1[i];
+                Type i2 = instance2[i];
+                int r = compareForWrite(i1, i2);
+                if (r != 0) {
+                    return r;
+                }
+            }
+            return Integer.compare(l1, l2);
+        }
+    }
 
     /**
      * Represents a "kind" of Type.
@@ -51,39 +84,45 @@ public abstract class Type implements Descriptor {
      */
     public enum Kind {
         /** A Java class, interface, or annotation */
-        CLASS,
+        CLASS(2),
 
         /** A Java array */
-        ARRAY,
+        ARRAY(3),
 
         /**
          * A Java primitive (boolean, byte, short, char, int, long, float, double)
          */
-        PRIMITIVE,
+        PRIMITIVE(1),
 
         /** Used to designate a Java method that returns nothing */
-        VOID,
+        VOID(0),
 
         /** A resolved generic type parameter or type argument */
-        TYPE_VARIABLE,
+        TYPE_VARIABLE(4),
 
         /**
          * An unresolved type parameter or argument. This is merely a placeholder
          * which occurs during an error condition or incomplete processing. In most
          * cases, it need not be dealt with.
          */
-        UNRESOLVED_TYPE_VARIABLE,
+        UNRESOLVED_TYPE_VARIABLE(5),
 
         /** A generic wildcard type */
-        WILDCARD_TYPE,
+        WILDCARD_TYPE(6),
 
         /** A generic parameterized type */
-        PARAMETERIZED_TYPE,
+        PARAMETERIZED_TYPE(7),
 
         /** A reference to a resolved type variable occuring in the bound of a recursive type parameter */
-        TYPE_VARIABLE_REFERENCE,
+        TYPE_VARIABLE_REFERENCE(8),
 
         ;
+
+        private final int sortOrder;
+
+        Kind(int sortOrder) {
+            this.sortOrder = sortOrder;
+        }
 
         public static Kind fromOrdinal(int ordinal) {
             switch (ordinal) {

@@ -22,14 +22,15 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -47,10 +48,9 @@ import java.util.TreeMap;
  * IndexWriter is not thread-safe and can not be shared between concurrent
  * threads.
  *
+ * @author Jason T. Greene
  * @see org.jboss.jandex.Indexer
  * @see org.jboss.jandex.Index
- * @author Jason T. Greene
- *
  */
 final class IndexWriterV2 extends IndexWriterImpl {
     static final int MIN_VERSION = 6;
@@ -108,9 +108,18 @@ final class IndexWriterV2 extends IndexWriterImpl {
     }
 
     static class ReferenceTable<T> {
-        private IdentityHashMap<T, ReferenceEntry> references = new IdentityHashMap<T, ReferenceEntry>();
-        private List<T> table = new ArrayList<T>();
+        private final IdentityHashMap<T, ReferenceEntry> references = new IdentityHashMap<T, ReferenceEntry>();
+        private final List<T> table = new ArrayList<T>();
         private int counter = 1;
+
+        void sort(Comparator<T> comparator) {
+            table.sort(comparator);
+            int newIndex = 1;
+            for (T reference : table) {
+                ReferenceEntry entry = references.get(reference);
+                entry.index = newIndex++;
+            }
+        }
 
         void addReference(T reference) {
             if (references.containsKey(reference)) {
@@ -227,6 +236,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     }
 
     private void writeUsersTable(PackedDataOutputStream stream, Map<DotName, ClassInfo[]> users) throws IOException {
+        users = new TreeMap<>(users);
         for (Entry<DotName, ClassInfo[]> entry : users.entrySet()) {
             writeUsersSet(stream, entry.getKey(), entry.getValue());
         }
@@ -235,6 +245,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeUsersSet(PackedDataOutputStream stream, DotName user, ClassInfo[] uses) throws IOException {
         stream.writePackedU32(positionOf(user));
         stream.writePackedU32(uses.length);
+        uses = Arrays.copyOf(uses, uses.length);
+        Arrays.sort(uses, Comparator.comparing(ClassInfo::name));
         for (ClassInfo use : uses) {
             stream.writePackedU32(positionOf(use.name()));
         }
@@ -252,10 +264,27 @@ final class IndexWriterV2 extends IndexWriterImpl {
 
     private void writeByteTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<byte[]> bytePool = names.bytePool();
-        stream.writePackedU32(bytePool.size());
+        int size = bytePool.size();
+        stream.writePackedU32(size);
         Iterator<byte[]> iterator = bytePool.iterator();
+        List<byte[]> sorted = new ArrayList<>(size);
         while (iterator.hasNext()) {
-            byte[] bytes = iterator.next();
+            sorted.add(iterator.next());
+        }
+        sorted.sort((arr1, arr2) -> {
+            int l1 = arr1.length;
+            int l2 = arr2.length;
+            int l = Math.min(l1, l2);
+            for (int i = 0; i < l; i++) {
+                byte b1 = arr1[i];
+                byte b2 = arr2[i];
+                if (b1 != b2) {
+                    return b1 - b2;
+                }
+            }
+            return Integer.compare(l1, l2);
+        });
+        for (byte[] bytes : sorted) {
             stream.writePackedU32(bytes.length);
             stream.write(bytes);
         }
@@ -286,28 +315,49 @@ final class IndexWriterV2 extends IndexWriterImpl {
 
     private void writeMethodTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<MethodInternal> methodPool = names.methodPool();
-        stream.writePackedU32(methodPool.size());
+        int size = methodPool.size();
+        stream.writePackedU32(size);
+        List<MethodInternal> sorted = new ArrayList<>(size);
         Iterator<MethodInternal> iterator = methodPool.iterator();
         while (iterator.hasNext()) {
-            writeMethodEntry(stream, iterator.next());
+            sorted.add(iterator.next());
+        }
+        sorted.sort(MethodInternal.NAME_AND_PARAMETER_COMPONENT_COMPARATOR);
+        for (MethodInternal methodInternal : sorted) {
+            System.out.println("WRITE METHOD: " + methodInternal);
+            writeMethodEntry(stream, methodInternal);
         }
     }
 
     private void writeFieldTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<FieldInternal> fieldPool = names.fieldPool();
-        stream.writePackedU32(fieldPool.size());
+        int size = fieldPool.size();
+        stream.writePackedU32(size);
+        List<FieldInternal> sorted = new ArrayList<>(size);
         Iterator<FieldInternal> iterator = fieldPool.iterator();
         while (iterator.hasNext()) {
-            writeFieldEntry(stream, iterator.next());
+            sorted.add(iterator.next());
+        }
+        sorted.sort(FieldInternal.NAME_COMPARATOR);
+        for (FieldInternal fieldInternal : sorted) {
+            System.out.println("WRITE FIELD: " + fieldInternal);
+            writeFieldEntry(stream, fieldInternal);
         }
     }
 
     private void writeRecordComponentTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<RecordComponentInternal> recordComponentPool = names.recordComponentPool();
-        stream.writePackedU32(recordComponentPool.size());
+        int size = recordComponentPool.size();
+        stream.writePackedU32(size);
+        List<RecordComponentInternal> sorted = new ArrayList<>(size);
         Iterator<RecordComponentInternal> iterator = recordComponentPool.iterator();
         while (iterator.hasNext()) {
-            writeRecordComponentEntry(stream, iterator.next());
+            sorted.add(iterator.next());
+        }
+        sorted.sort(RecordComponentInternal.NAME_COMPARATOR);
+        for (RecordComponentInternal recordComponentInternal : sorted) {
+            System.out.println("WRITE RECORD COMPONENT: " + recordComponentInternal);
+            writeRecordComponentEntry(stream, recordComponentInternal);
         }
     }
 
@@ -538,8 +588,11 @@ final class IndexWriterV2 extends IndexWriterImpl {
 
     private void writeClasses(PackedDataOutputStream stream, Index index) throws IOException {
         Collection<ClassInfo> classes = index.getKnownClasses();
-        stream.writePackedU32(classes.size());
-        for (ClassInfo clazz : classes) {
+        int size = classes.size();
+        stream.writePackedU32(size);
+        List<ClassInfo> sorted = new ArrayList<>(classes);
+        sorted.sort(Comparator.comparing(ClassInfo::name));
+        for (ClassInfo clazz : sorted) {
             writeClassEntry(stream, clazz);
         }
     }
@@ -549,7 +602,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
         stream.writePackedU32(modules.size());
         addClassName(DotName.createSimple("module-info"));
 
-        for (ModuleInfo module : modules) {
+        List<ModuleInfo> sorted = new ArrayList<>(modules);
+        sorted.sort(Comparator.comparing(ModuleInfo::name));
+        for (ModuleInfo module : sorted) {
             writeClassEntry(stream, module.moduleInfoClass());
             writeModuleEntry(stream, module);
         }
@@ -604,15 +659,19 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         if (version >= 11) {
-            stream.writePackedU32(clazz.memberClasses().size());
-            for (DotName memberClass : clazz.memberClasses()) {
+            List<DotName> memberClasses = new ArrayList<>(clazz.memberClasses());
+            stream.writePackedU32(memberClasses.size());
+            memberClasses.sort(Comparator.comparing(DotName::toString));
+            for (DotName memberClass : memberClasses) {
                 stream.writePackedU32(positionOf(memberClass));
             }
         }
 
         if (version >= 12) {
-            stream.writePackedU32(clazz.permittedSubclasses().size());
-            for (DotName permittedSubclass : clazz.permittedSubclasses()) {
+            List<DotName> permittedSubclasses = new ArrayList<>(clazz.permittedSubclasses());
+            stream.writePackedU32(permittedSubclasses.size());
+            permittedSubclasses.sort(Comparator.comparing(DotName::toString));
+            for (DotName permittedSubclass : permittedSubclasses) {
                 stream.writePackedU32(positionOf(permittedSubclass));
             }
         }
@@ -621,6 +680,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
         stream.writePackedU32(clazz.annotationsMap().size());
 
         FieldInternal[] fields = clazz.fieldArray();
+        fields = Arrays.copyOf(fields, fields.length);
+        // TODO needed? Arrays.sort(fields, FieldInternal.NAME_COMPARATOR);
         stream.writePackedU32(fields.length);
         for (FieldInternal field : fields) {
             stream.writePackedU32(positionOf(field));
@@ -631,6 +692,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         MethodInternal[] methods = clazz.methodArray();
+        methods = Arrays.copyOf(methods, methods.length);
+        // TODO needed? Arrays.sort(methods, MethodInternal.NAME_AND_PARAMETER_COMPONENT_COMPARATOR);
         stream.writePackedU32(methods.length);
         for (MethodInternal method : methods) {
             stream.writePackedU32(positionOf(method));
@@ -642,6 +705,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
 
         if (version >= 10) {
             RecordComponentInternal[] recordComponents = clazz.recordComponentArray();
+            recordComponents = Arrays.copyOf(recordComponents, recordComponents.length);
+            // TODO needed? Arrays.sort(recordComponents, RecordComponentInternal.NAME_COMPARATOR);
             stream.writePackedU32(recordComponents.length);
             for (RecordComponentInternal recordComponent : recordComponents) {
                 stream.writePackedU32(positionOf(recordComponent));
@@ -650,8 +715,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
             stream.writePackedU32(positionOf(clazz.recordComponentPositionArray()));
         }
 
-        Set<Entry<DotName, List<AnnotationInstance>>> entrySet = clazz.annotationsMap().entrySet();
-        for (Entry<DotName, List<AnnotationInstance>> entry : entrySet) {
+        List<Entry<DotName, List<AnnotationInstance>>> entries = new ArrayList<>(clazz.annotationsMap().entrySet());
+        // TODO needed? entries.sort(Entry.comparingByKey());
+        for (Entry<DotName, List<AnnotationInstance>> entry : entries) {
             writeAnnotations(stream, entry.getValue());
         }
     }
@@ -663,8 +729,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
         stream.writePackedU32(module.mainClass() == null ? 0 : positionOf(module.mainClass()));
 
         // requires
-        List<ModuleInfo.RequiredModuleInfo> requires = module.requiresList();
+        List<ModuleInfo.RequiredModuleInfo> requires = new ArrayList<>(module.requiresList());
         stream.writePackedU32(requires.size());
+        // TODO needed??        requires.sort();
 
         for (ModuleInfo.RequiredModuleInfo required : requires) {
             stream.writePackedU32(positionOf(required.name()));
@@ -673,8 +740,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         // exports
-        List<ModuleInfo.ExportedPackageInfo> exports = module.exportsList();
+        List<ModuleInfo.ExportedPackageInfo> exports = new ArrayList<>(module.exportsList());
         stream.writePackedU32(exports.size());
+        // TODO needed??        exports.sort();
 
         for (ModuleInfo.ExportedPackageInfo exported : exports) {
             stream.writePackedU32(positionOf(exported.source()));
@@ -686,8 +754,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
         writeDotNames(stream, module.usesList());
 
         // opens
-        List<ModuleInfo.OpenedPackageInfo> opens = module.opensList();
+        List<ModuleInfo.OpenedPackageInfo> opens = new ArrayList<>(module.opensList());
         stream.writePackedU32(opens.size());
+        // TODO needed??        opens.sort();
 
         for (ModuleInfo.OpenedPackageInfo opened : opens) {
             stream.writePackedU32(positionOf(opened.source()));
@@ -696,8 +765,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         // provides
-        List<ModuleInfo.ProvidedServiceInfo> provides = module.providesList();
+        List<ModuleInfo.ProvidedServiceInfo> provides = new ArrayList<>(module.providesList());
         stream.writePackedU32(provides.size());
+        // TODO needed??        exports.sort();
 
         for (ModuleInfo.ProvidedServiceInfo provided : provides) {
             stream.writePackedU32(positionOf(provided.service()));
@@ -927,6 +997,10 @@ final class IndexWriterV2 extends IndexWriterImpl {
                 }
             }
         }
+
+        typeTable.sort(Type.TYPE_NAME_WRITE_COMPARATOR);
+        typeListTable.sort(Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR);
+        annotationTable.sort(AnnotationInstance.NAME_COMPARATOR);
     }
 
     private void addClass(ClassInfo clazz) {
