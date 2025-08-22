@@ -110,7 +110,7 @@ class NameTable {
     }
 
     int positionOf(MethodInternal methodInternal) {
-        return methodPool.writeView().positionOf(methodInternal);
+        return methodPool.index().positionOf(methodInternal);
     }
 
     FieldInternal intern(FieldInternal fieldInternal) {
@@ -118,7 +118,7 @@ class NameTable {
     }
 
     int positionOf(FieldInternal fieldInternal) {
-        return fieldPool.writeView().positionOf(fieldInternal);
+        return fieldPool.index().positionOf(fieldInternal);
     }
 
     RecordComponentInternal intern(RecordComponentInternal recordComponentInternal) {
@@ -126,7 +126,7 @@ class NameTable {
     }
 
     int positionOf(RecordComponentInternal recordComponentInternal) {
-        return recordComponentPool.writeView().positionOf(recordComponentInternal);
+        return recordComponentPool.index().positionOf(recordComponentInternal);
     }
 
     StrongInternPool<String> stringPool() {

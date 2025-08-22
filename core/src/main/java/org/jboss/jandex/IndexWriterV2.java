@@ -294,7 +294,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeMethodTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<MethodInternal> methodPool = names.methodPool();
         stream.writePackedU32(methodPool.size());
-        for (MethodInternal methodInternal : methodPool.writeView()) {
+        for (MethodInternal methodInternal : methodPool) {
             writeMethodEntry(stream, methodInternal);
         }
     }
@@ -302,7 +302,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeFieldTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<FieldInternal> fieldPool = names.fieldPool();
         stream.writePackedU32(fieldPool.size());
-        for (FieldInternal fieldInternal : fieldPool.writeView()) {
+        for (FieldInternal fieldInternal : fieldPool) {
             writeFieldEntry(stream, fieldInternal);
         }
     }
@@ -310,7 +310,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeRecordComponentTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<RecordComponentInternal> recordComponentPool = names.recordComponentPool();
         stream.writePackedU32(recordComponentPool.size());
-        for (RecordComponentInternal recordComponentInternal : recordComponentPool.writeView()) {
+        for (RecordComponentInternal recordComponentInternal : recordComponentPool) {
             writeRecordComponentEntry(stream, recordComponentInternal);
         }
     }

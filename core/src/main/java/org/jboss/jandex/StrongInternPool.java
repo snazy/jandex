@@ -41,7 +41,7 @@ import java.util.NoSuchElementException;
  *
  * @author Jason T. Greene
  */
-abstract class StrongInternPool<E> implements Cloneable, Serializable {
+abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<E> {
     /**
      * Marks null keys.
      */
@@ -472,6 +472,7 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
         }
     }
 
+    @Override
     public Iterator<E> iterator() {
         return new IdentityHashSetIterator();
     }
