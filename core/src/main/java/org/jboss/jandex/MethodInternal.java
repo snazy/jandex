@@ -17,6 +17,8 @@
  */
 package org.jboss.jandex;
 
+import static org.jboss.jandex.Utils.BYTE_ARRAY_COMPARATOR;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,19 +36,8 @@ final class MethodInternal {
     static final byte[][] EMPTY_PARAMETER_NAMES = new byte[0][];
 
     private static class NameAndParameterComponentComparator implements Comparator<MethodInternal> {
-        private int compare(byte[] left, byte[] right) {
-            for (int i = 0, j = 0; i < left.length && j < right.length; i++, j++) {
-                int a = (left[i] & 0xff);
-                int b = (right[j] & 0xff);
-                if (a != b) {
-                    return a - b;
-                }
-            }
-            return left.length - right.length;
-        }
-
         public int compare(MethodInternal instance, MethodInternal instance2) {
-            int x = compare(instance.name, instance2.name);
+            int x = BYTE_ARRAY_COMPARATOR.compare(instance.name, instance2.name);
             if (x != 0) {
                 return x;
             }
@@ -79,15 +70,23 @@ final class MethodInternal {
     private static final class WriteSortComparator extends NameAndParameterComponentComparator {
         @Override
         public int compare(MethodInternal instance, MethodInternal instance2) {
-            int r = super.compare(instance, instance2);
+            int r = BYTE_ARRAY_COMPARATOR.compare(instance.name, instance2.name);
             if (r != 0) {
                 return r;
             }
-            r = Integer.compare(instance.flags, instance2.flags);
+            r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(instance.parameterTypes, instance2.parameterTypes);
             if (r != 0) {
                 return r;
             }
-            return 0;
+            r = Type.TYPE_NAME_WRITE_COMPARATOR.compare(instance.returnType, instance2.returnType);
+            if (r != 0) {
+                return r;
+            }
+            r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(instance.exceptions, instance2.exceptions);
+            if (r != 0) {
+                return r;
+            }
+            return instance.flags - instance2.flags;
         }
     }
 
@@ -97,16 +96,6 @@ final class MethodInternal {
         Type[] typeParameters;
         AnnotationValue defaultValue;
         AnnotationInstance[] annotations;
-
-        @Override
-        public String toString() {
-            return "ExtraInfo{" +
-                    "receiverType=" + receiverType +
-                    ", typeParameters=" + Arrays.toString(typeParameters) +
-                    ", defaultValue=" + defaultValue +
-                    ", annotations=" + Arrays.toString(annotations) +
-                    '}';
-        }
     }
 
     private byte[] name;

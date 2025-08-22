@@ -18,9 +18,12 @@
 
 package org.jboss.jandex;
 
+import static org.jboss.jandex.Utils.BYTE_ARRAY_COMPARATOR;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -101,6 +104,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
      * Cache for an index
      */
     private transient Index index;
+
+    /**
+     * Sorted view for reproducible index serialization.
+     */
+    private transient WriteView<E> writeView;
 
     StrongInternPool(Class<E> elementType, int initialCapacity, float loadFactor) {
         if (elementType == null) {
@@ -476,6 +484,16 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
         return index;
     }
 
+    abstract WriteView<E> writeView();
+
+    protected WriteView<E> createWriteView(Comparator<E> comparator) {
+        if (writeView == null || writeView.modCount != modCount) {
+            writeView = new WriteView<>(comparator);
+        }
+
+        return writeView;
+    }
+
     public String toString() {
         Iterator<E> i = iterator();
         if (!i.hasNext())
@@ -489,6 +507,97 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
             if (!i.hasNext())
                 return sb.append(']').toString();
             sb.append(", ");
+        }
+    }
+
+    final class WriteView<E> implements Iterable<E> {
+        private final int modCount;
+        private final E[] sorted;
+        private final Comparator<E> comparator;
+        private final int first;
+
+        private int compareNullSafe(E o1, E o2) {
+            if (o1 != null && o2 != null) {
+                return comparator.compare(o1, o2);
+            }
+            if (o1 == null && o2 == null) {
+                return 0;
+            }
+            if (o1 == null) {
+                return -1;
+            }
+            return 1;
+        }
+
+        WriteView(Comparator<E> comparator) {
+            this.sorted = (E[]) Arrays.copyOf(table, table.length);
+            this.comparator = comparator;
+            Arrays.sort(sorted, this::compareNullSafe);
+            int first = Integer.MAX_VALUE;
+            for (int i = 0; i < sorted.length; i++) {
+                if (sorted[i] != null) {
+                    first = i;
+                    break;
+                }
+            }
+            this.first = first;
+            this.modCount = StrongInternPool.this.modCount;
+        }
+
+        @Override
+        public Iterator<E> iterator() {
+            return new Iterator<E>() {
+                private final int expectedCount = modCount;
+                private final E[] sorted = WriteView.this.sorted;
+                private int next = 0;
+                private int current = -1;
+                private boolean hasNext;
+
+                public boolean hasNext() {
+                    if (hasNext)
+                        return true;
+
+                    E[] table = this.sorted;
+                    for (int i = next; i < table.length; i++) {
+                        if (table[i] != null) {
+                            next = i;
+                            return hasNext = true;
+                        }
+                    }
+
+                    next = table.length;
+                    return false;
+                }
+
+                @SuppressWarnings("unchecked")
+                public E next() {
+                    if (modCount != expectedCount)
+                        throw new ConcurrentModificationException();
+
+                    if (!hasNext && !hasNext())
+                        throw new NoSuchElementException();
+
+                    current = next++;
+                    hasNext = false;
+
+                    return unmaskNull(sorted[current]);
+                }
+            };
+        }
+
+        /**
+         * Returns a 1-based position of given entry in the table. Returns -1 if the entry is not
+         * present in the table. This indeed means that this method never returns 0.
+         *
+         * @param e the entry to find in the table
+         * @return 1-based position of {@code e} in the table, or -1 if it is not present
+         */
+        int positionOf(E e) {
+            int offset = Arrays.binarySearch(sorted, first, sorted.length, e, this::compareNullSafe);
+            if (offset < first) {
+                return -1;
+            }
+            return offset - first + 1;
         }
     }
 
@@ -653,6 +762,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
         }
 
         @Override
+        WriteView<byte[]> writeView() {
+            return createWriteView(BYTE_ARRAY_COMPARATOR);
+        }
+
+        @Override
         boolean equality(byte[] o1, byte[] o2) {
             return Arrays.equals(o1, o2);
         }
@@ -666,6 +780,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
     private static final class StringInternPool extends StrongInternPool<String> {
         public StringInternPool() {
             super(String.class);
+        }
+
+        @Override
+        StrongInternPool<String>.WriteView<String> writeView() {
+            return createWriteView(Comparator.naturalOrder());
         }
 
         @Override
@@ -685,6 +804,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
         }
 
         @Override
+        StrongInternPool<Type>.WriteView<Type> writeView() {
+            return createWriteView(Type.TYPE_NAME_WRITE_COMPARATOR);
+        }
+
+        @Override
         boolean equality(Type o1, Type o2) {
             return o1 != null && o1.internEquals(o2);
         }
@@ -698,6 +822,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
     private static final class TypeArrayInternPool extends StrongInternPool<Type[]> {
         public TypeArrayInternPool() {
             super(Type[].class);
+        }
+
+        @Override
+        StrongInternPool<Type[]>.WriteView<Type[]> writeView() {
+            return createWriteView(Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR);
         }
 
         @Override
@@ -717,6 +846,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
         }
 
         @Override
+        StrongInternPool<MethodInternal>.WriteView<MethodInternal> writeView() {
+            return createWriteView(MethodInternal.WRITE_SORT_COMPARATOR);
+        }
+
+        @Override
         boolean equality(MethodInternal o1, MethodInternal o2) {
             return o1 != null && o1.internEquals(o2);
         }
@@ -733,6 +867,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
         }
 
         @Override
+        StrongInternPool<FieldInternal>.WriteView<FieldInternal> writeView() {
+            return createWriteView(FieldInternal.NAME_COMPARATOR);
+        }
+
+        @Override
         boolean equality(FieldInternal o1, FieldInternal o2) {
             return o1 != null && o1.internEquals(o2);
         }
@@ -746,6 +885,11 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable {
     private static final class RecordComponentInternPool extends StrongInternPool<RecordComponentInternal> {
         public RecordComponentInternPool() {
             super(RecordComponentInternal.class);
+        }
+
+        @Override
+        StrongInternPool<RecordComponentInternal>.WriteView<RecordComponentInternal> writeView() {
+            return createWriteView(RecordComponentInternal.NAME_COMPARATOR);
         }
 
         @Override

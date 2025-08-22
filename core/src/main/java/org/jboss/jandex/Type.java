@@ -48,11 +48,11 @@ public abstract class Type implements Descriptor {
     private final AnnotationInstance[] annotations;
 
     private static int compareForWrite(Type instance1, Type instance2) {
-        int r = Integer.compare(instance1.kind().sortOrder, instance2.kind().sortOrder);
+        int r = instance1.name().compareTo(instance2.name());
         if (r != 0) {
             return r;
         }
-        return instance1.name().compareTo(instance2.name());
+        return instance1.kind().sortOrder - instance2.kind().sortOrder;
     }
 
     static class TypeWriteComparator implements Comparator<Type> {
@@ -65,7 +65,8 @@ public abstract class Type implements Descriptor {
         public int compare(Type[] instance1, Type[] instance2) {
             int l1 = instance1.length;
             int l2 = instance2.length;
-            for (int i = 0; i < l1 && i < l2; i++) {
+            int l = Math.min(l1, l2);
+            for (int i = 0; i < l; i++) {
                 Type i1 = instance1[i];
                 Type i2 = instance2[i];
                 int r = compareForWrite(i1, i2);
@@ -73,7 +74,7 @@ public abstract class Type implements Descriptor {
                     return r;
                 }
             }
-            return Integer.compare(l1, l2);
+            return l1 - l2;
         }
     }
 

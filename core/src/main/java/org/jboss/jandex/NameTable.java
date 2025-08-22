@@ -86,7 +86,7 @@ class NameTable {
     }
 
     int positionOf(String string) {
-        return stringPool.index().positionOf(string);
+        return stringPool.writeView().positionOf(string);
     }
 
     Type intern(Type type) {
@@ -102,7 +102,7 @@ class NameTable {
     }
 
     int positionOf(byte[] bytes) {
-        return bytePool.index().positionOf(bytes);
+        return bytePool.writeView().positionOf(bytes);
     }
 
     MethodInternal intern(MethodInternal methodInternal) {
@@ -110,7 +110,7 @@ class NameTable {
     }
 
     int positionOf(MethodInternal methodInternal) {
-        return methodPool.index().positionOf(methodInternal);
+        return methodPool.writeView().positionOf(methodInternal);
     }
 
     FieldInternal intern(FieldInternal fieldInternal) {
@@ -118,7 +118,7 @@ class NameTable {
     }
 
     int positionOf(FieldInternal fieldInternal) {
-        return fieldPool.index().positionOf(fieldInternal);
+        return fieldPool.writeView().positionOf(fieldInternal);
     }
 
     RecordComponentInternal intern(RecordComponentInternal recordComponentInternal) {
@@ -126,7 +126,7 @@ class NameTable {
     }
 
     int positionOf(RecordComponentInternal recordComponentInternal) {
-        return recordComponentPool.index().positionOf(recordComponentInternal);
+        return recordComponentPool.writeView().positionOf(recordComponentInternal);
     }
 
     StrongInternPool<String> stringPool() {

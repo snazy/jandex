@@ -25,6 +25,7 @@ import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,20 @@ class Utils {
     static final byte[] INIT_METHOD_NAME = Utils.toUTF8("<init>");
 
     static final byte[] CLINIT_METHOD_NAME = Utils.toUTF8("<clinit>");
+
+    static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = (arr1, arr2) -> {
+        int l1 = arr1.length;
+        int l2 = arr2.length;
+        int l = Math.min(l1, l2);
+        for (int i = 0; i < l; i++) {
+            int b1 = arr1[i] & 0xff;
+            int b2 = arr2[i] & 0xff;
+            if (b1 != b2) {
+                return b1 - b2;
+            }
+        }
+        return l1 - l2;
+    };
 
     static byte[] toUTF8(String string) {
         return string.getBytes(StandardCharsets.UTF_8);

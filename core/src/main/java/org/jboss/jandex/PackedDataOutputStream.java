@@ -59,7 +59,6 @@ class PackedDataOutputStream extends DataOutputStream {
      * @throws IOException if any i/o error occurs
      */
     public void writePackedU32(int i) throws IOException {
-        System.out.println("    " + i);
         if ((i & ~MAX_1BYTE) == 0) {
             writeByte(i);
         } else if ((i & ~MAX_2BYTE) == 0) {
