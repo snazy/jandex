@@ -72,7 +72,7 @@ import java.util.List;
  * @author Jason T. Greene
  *
  */
-public abstract class AnnotationValue {
+public abstract class AnnotationValue implements Comparable<AnnotationValue> {
     static final AnnotationValue[] EMPTY_ARRAY = new AnnotationValue[0];
 
     /**
@@ -579,6 +579,17 @@ public abstract class AnnotationValue {
         return name.hashCode();
     }
 
+    @Override
+    public final int compareTo(AnnotationValue o) {
+        int r = name().compareTo(o.name());
+        if (r != 0) {
+            return r;
+        }
+        return compareToSpecial(o);
+    }
+
+    abstract int compareToSpecial(AnnotationValue o);
+
     static final class StringValue extends AnnotationValue {
         private final String value;
 
@@ -594,6 +605,11 @@ public abstract class AnnotationValue {
         @Override
         public Kind kind() {
             return Kind.STRING;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return value.compareTo(((StringValue) o).value);
         }
 
         String toString(boolean includeName) {
@@ -631,6 +647,11 @@ public abstract class AnnotationValue {
         ByteValue(String name, byte value) {
             super(name);
             this.value = value;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Byte.compare(value, ((ByteValue) o).value);
         }
 
         public Byte value() {
@@ -695,6 +716,11 @@ public abstract class AnnotationValue {
             this.value = value;
         }
 
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Character.compare(value, ((CharacterValue) o).value);
+        }
+
         public Character value() {
             return value;
         }
@@ -735,6 +761,11 @@ public abstract class AnnotationValue {
         public DoubleValue(String name, double value) {
             super(name);
             this.value = value;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Double.compare(value, ((DoubleValue) o).value);
         }
 
         public Double value() {
@@ -802,6 +833,11 @@ public abstract class AnnotationValue {
             this.value = value;
         }
 
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Float.compare(value, ((FloatValue) o).value);
+        }
+
         public Float value() {
             return value;
         }
@@ -863,6 +899,11 @@ public abstract class AnnotationValue {
         ShortValue(String name, short value) {
             super(name);
             this.value = value;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Short.compare(value, ((ShortValue) o).value);
         }
 
         public Short value() {
@@ -928,6 +969,11 @@ public abstract class AnnotationValue {
             this.value = value;
         }
 
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Integer.compare(value, ((IntegerValue) o).value);
+        }
+
         public Integer value() {
             return value;
         }
@@ -989,6 +1035,11 @@ public abstract class AnnotationValue {
         LongValue(String name, long value) {
             super(name);
             this.value = value;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Long.compare(value, ((LongValue) o).value);
         }
 
         public Long value() {
@@ -1054,6 +1105,11 @@ public abstract class AnnotationValue {
             this.value = value;
         }
 
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            return Boolean.compare(value, ((BooleanValue) o).value);
+        }
+
         public Boolean value() {
             return value;
         }
@@ -1099,6 +1155,16 @@ public abstract class AnnotationValue {
             super(name);
             this.typeName = typeName;
             this.value = value;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            EnumValue other = (EnumValue) o;
+            int r = value.compareTo(other.value);
+            if (r != 0) {
+                return r;
+            }
+            return typeName.compareTo(other.typeName);
         }
 
         public String value() {
@@ -1150,6 +1216,12 @@ public abstract class AnnotationValue {
             this.type = type;
         }
 
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            ClassValue other = (ClassValue) o;
+            return type.name().compareTo(other.type.name());
+        }
+
         public Type value() {
             return type;
         }
@@ -1193,6 +1265,12 @@ public abstract class AnnotationValue {
             this.value = value;
         }
 
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            NestedAnnotation other = (NestedAnnotation) o;
+            return value.compareTo(other.value);
+        }
+
         public AnnotationInstance value() {
             return value;
         }
@@ -1234,6 +1312,21 @@ public abstract class AnnotationValue {
         ArrayValue(String name, AnnotationValue value[]) {
             super(name);
             this.value = value.length > 0 ? value : EMPTY_ARRAY;
+        }
+
+        @Override
+        int compareToSpecial(AnnotationValue o) {
+            ArrayValue other = (ArrayValue) o;
+            int l1 = value.length;
+            int l2 = other.value.length;
+            int l = Math.min(l1, l2);
+            for (int i = 0; i < l; i++) {
+                int r = value[i].compareTo(other.value[i]);
+                if (r != 0) {
+                    return r;
+                }
+            }
+            return 0;
         }
 
         public AnnotationValue[] value() {

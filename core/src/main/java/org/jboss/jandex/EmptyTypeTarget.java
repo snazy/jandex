@@ -48,6 +48,19 @@ public class EmptyTypeTarget extends TypeTarget {
         this.receiver = receiver;
     }
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        EmptyTypeTarget other = (EmptyTypeTarget) o;
+        if (receiver != other.receiver) {
+            return receiver ? -1 : 1;
+        }
+        return -1;
+    }
+
     /**
      * Returns whether the annotated type occurs within a method receiver (the {@code this} reference
      * the method receives). It will return {@code false} if the type occurs in a method return type

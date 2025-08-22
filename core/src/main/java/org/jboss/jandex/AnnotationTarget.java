@@ -33,7 +33,7 @@ import java.util.Collection;
  * @author Jason T. Greene
  *
  */
-public interface AnnotationTarget {
+public interface AnnotationTarget extends Comparable<AnnotationTarget> {
 
     /**
      * Specifies the kind of object a target represents.

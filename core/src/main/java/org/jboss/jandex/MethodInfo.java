@@ -72,6 +72,12 @@ public final class MethodInfo implements Declaration, Descriptor, GenericSignatu
         this(clazz, new MethodInternal(name, parameterNames, parameterTypes, returnType, flags, typeParameters, exceptions));
     }
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        MethodInfo other = (MethodInfo) o;
+        return methodInternal.compareTo(other.methodInternal);
+    }
+
     /**
      * Construct a new mock Method instance.
      *

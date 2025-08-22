@@ -48,6 +48,12 @@ public final class RecordComponentInfo implements Declaration, Descriptor, Gener
         this(clazz, new RecordComponentInternal(name, type));
     }
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        RecordComponentInfo other = o.asRecordComponent();
+        return internal.compareTo(other.internal);
+    }
+
     /**
      * Constructs a new mock record component info
      *

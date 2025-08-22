@@ -54,6 +54,19 @@ public class TypeParameterBoundTypeTarget extends TypeParameterTypeTarget {
         this.boundPosition = (short) boundPosition;
     }
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        TypeParameterBoundTypeTarget other = (TypeParameterBoundTypeTarget) o;
+        if (boundPosition != other.boundPosition) {
+            return boundPosition < other.boundPosition ? -1 : 1;
+        }
+        return -1;
+    }
+
     /**
      * Returns the index of the bound this type annotation is within.
      *

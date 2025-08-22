@@ -47,6 +47,11 @@ public class ThrowsTypeTarget extends PositionBasedTypeTarget {
     }
 
     @Override
+    public int compareTo(AnnotationTarget o) {
+        return super.compareToBase(o);
+    }
+
+    @Override
     public Usage usage() {
         return Usage.THROWS;
     }

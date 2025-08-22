@@ -45,6 +45,15 @@ public abstract class TypeTarget implements AnnotationTarget {
     private final AnnotationTarget enclosingTarget;
     private Type target;
 
+    int compareToBase(AnnotationTarget o) {
+        TypeTarget other = (TypeTarget) o;
+        int r = enclosingTarget.compareTo(other.enclosingTarget);
+        if (r != 0) {
+            return r;
+        }
+        return Type.TYPE_NAME_WRITE_COMPARATOR.compare(target, other.target);
+    }
+
     /** Specifies a form of usage of a type annotation */
     public enum Usage {
         /** Indicates a type annotation occurs within a field, method receiver, or method return type */

@@ -47,6 +47,11 @@ public class MethodParameterTypeTarget extends PositionBasedTypeTarget {
     }
 
     @Override
+    public int compareTo(AnnotationTarget o) {
+        return super.compareToBase(o);
+    }
+
+    @Override
     public final Usage usage() {
         return Usage.METHOD_PARAMETER;
     }

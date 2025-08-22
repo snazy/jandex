@@ -51,6 +51,11 @@ public class ClassExtendsTypeTarget extends PositionBasedTypeTarget {
     }
 
     @Override
+    public int compareTo(AnnotationTarget o) {
+        return super.compareToBase(o);
+    }
+
+    @Override
     public final Usage usage() {
         return Usage.CLASS_EXTENDS;
     }

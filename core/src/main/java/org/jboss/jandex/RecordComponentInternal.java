@@ -18,6 +18,8 @@
 
 package org.jboss.jandex;
 
+import static org.jboss.jandex.Utils.BYTE_ARRAY_COMPARATOR;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -25,28 +27,27 @@ import java.util.List;
 /**
  * The shared internal representation for RecordComponentInfo objects.
  */
-final class RecordComponentInternal {
+final class RecordComponentInternal implements Comparable<RecordComponentInternal> {
     static final RecordComponentInternal[] EMPTY_ARRAY = new RecordComponentInternal[0];
     private final byte[] name;
     private Type type;
     private AnnotationInstance[] annotations;
 
+    @Override
+    public int compareTo(RecordComponentInternal o) {
+        // TODO delegate to NAME_COMPARATOR?
+        int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
+        if (r != 0) {
+            return r;
+        }
+        return 0;
+    }
+
     static final NameComparator NAME_COMPARATOR = new NameComparator();
 
     static class NameComparator implements Comparator<RecordComponentInternal> {
-        private int compare(byte[] left, byte[] right) {
-            for (int i = 0, j = 0; i < left.length && j < right.length; i++, j++) {
-                int a = (left[i] & 0xff);
-                int b = (right[j] & 0xff);
-                if (a != b) {
-                    return a - b;
-                }
-            }
-            return left.length - right.length;
-        }
-
         public int compare(RecordComponentInternal instance, RecordComponentInternal instance2) {
-            return compare(instance.name, instance2.name); //instance.name.compareTo(instance2.name);
+            return BYTE_ARRAY_COMPARATOR.compare(instance.name, instance2.name);
         }
     }
 

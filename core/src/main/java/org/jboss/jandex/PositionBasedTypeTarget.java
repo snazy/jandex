@@ -43,6 +43,19 @@ public abstract class PositionBasedTypeTarget extends TypeTarget {
         this.position = (short) position;
     }
 
+    @Override
+    int compareToBase(AnnotationTarget o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        PositionBasedTypeTarget other = (PositionBasedTypeTarget) o;
+        if (position != other.position) {
+            return position < other.position ? -1 : 1;
+        }
+        return -1;
+    }
+
     /**
      * Returns a subclass specific position where the type is located.
      *

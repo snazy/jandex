@@ -302,7 +302,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeFieldTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<FieldInternal> fieldPool = names.fieldPool();
         stream.writePackedU32(fieldPool.size());
-        for (FieldInternal fieldInternal : fieldPool) {
+        for (FieldInternal fieldInternal : fieldPool.writeView()) {
+            System.out.println("writeFieldTable: " + fieldInternal);
             writeFieldEntry(stream, fieldInternal);
         }
     }

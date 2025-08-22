@@ -41,6 +41,16 @@ public final class MethodParameterInfo implements Declaration {
         this.position = position;
     }
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        MethodParameterInfo other = o.asMethodParameter();
+        int r = method.compareTo(other.method);
+        if (r != 0) {
+            return r;
+        }
+        return position - other.position;
+    }
+
     /**
      * Constructs a new mock method parameter info
      *

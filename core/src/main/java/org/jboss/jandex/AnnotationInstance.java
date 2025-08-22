@@ -41,7 +41,7 @@ import java.util.List;
  * @author Jason T. Greene
  *
  */
-public final class AnnotationInstance {
+public final class AnnotationInstance implements Comparable<AnnotationInstance> {
     static final NameComparator NAME_COMPARATOR = new NameComparator();
     static final AnnotationInstance[] EMPTY_ARRAY = new AnnotationInstance[0];
 
@@ -49,6 +49,27 @@ public final class AnnotationInstance {
     private final AnnotationTarget target;
     private final AnnotationValue[] values;
     private final boolean runtimeVisible;
+
+    @Override
+    public int compareTo(AnnotationInstance o) {
+        int r = name().compareTo(o.name());
+        if (r != 0) {
+            return r;
+        }
+        // not comparing 'target' as that will lead to an endless recursion
+        AnnotationValue[] values1 = values;
+        AnnotationValue[] values2 = o.values;
+        int l1 = values1.length;
+        int l2 = values2.length;
+        int l = Math.min(l1, l2);
+        for (int i = 0; i < l; i++) {
+            r = values1[i].compareTo(values2[i]);
+            if (r != 0) {
+                return r;
+            }
+        }
+        return l1 - l2;
+    }
 
     static class NameComparator implements Comparator<AnnotationInstance> {
         public int compare(AnnotationInstance instance1, AnnotationInstance instance2) {

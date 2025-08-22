@@ -29,11 +29,31 @@ import java.util.List;
  *
  * @author Jason T. Greene
  */
-final class MethodInternal {
+final class MethodInternal implements Comparable<MethodInternal> {
     static final MethodInternal[] EMPTY_ARRAY = new MethodInternal[0];
     static final NameAndParameterComponentComparator NAME_AND_PARAMETER_COMPONENT_COMPARATOR = new NameAndParameterComponentComparator();
-    static final NameAndParameterComponentComparator WRITE_SORT_COMPARATOR = new WriteSortComparator();
     static final byte[][] EMPTY_PARAMETER_NAMES = new byte[0][];
+
+    @Override
+    public int compareTo(MethodInternal o) {
+        int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
+        if (r != 0) {
+            return r;
+        }
+        r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(parameterTypes, o.parameterTypes);
+        if (r != 0) {
+            return r;
+        }
+        r = Type.TYPE_NAME_WRITE_COMPARATOR.compare(returnType, o.returnType);
+        if (r != 0) {
+            return r;
+        }
+        r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(exceptions, o.exceptions);
+        if (r != 0) {
+            return r;
+        }
+        return flags - o.flags;
+    }
 
     private static class NameAndParameterComponentComparator implements Comparator<MethodInternal> {
         public int compare(MethodInternal instance, MethodInternal instance2) {
@@ -64,29 +84,6 @@ final class MethodInternal {
             // Prefer non-synthetic methods when matching
             return (instance.flags & (Modifiers.SYNTHETIC | Modifiers.BRIDGE))
                     - (instance2.flags & (Modifiers.SYNTHETIC | Modifiers.BRIDGE));
-        }
-    }
-
-    private static final class WriteSortComparator extends NameAndParameterComponentComparator {
-        @Override
-        public int compare(MethodInternal instance, MethodInternal instance2) {
-            int r = BYTE_ARRAY_COMPARATOR.compare(instance.name, instance2.name);
-            if (r != 0) {
-                return r;
-            }
-            r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(instance.parameterTypes, instance2.parameterTypes);
-            if (r != 0) {
-                return r;
-            }
-            r = Type.TYPE_NAME_WRITE_COMPARATOR.compare(instance.returnType, instance2.returnType);
-            if (r != 0) {
-                return r;
-            }
-            r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(instance.exceptions, instance2.exceptions);
-            if (r != 0) {
-                return r;
-            }
-            return instance.flags - instance2.flags;
         }
     }
 

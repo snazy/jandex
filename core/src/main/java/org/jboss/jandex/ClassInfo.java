@@ -73,6 +73,12 @@ public final class ClassInfo implements Declaration, Descriptor, GenericSignatur
     private NestingInfo nestingInfo;
     private ExtraInfo extra;
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        ClassInfo other = (ClassInfo) o;
+        return name.compareTo(other.name);
+    }
+
     /** Describes the form of nesting used by a class */
     public enum NestingType {
         /** A standard class declared within its own source unit. */

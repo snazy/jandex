@@ -52,6 +52,12 @@ public final class FieldInfo implements Declaration, Descriptor, GenericSignatur
         this(clazz, new FieldInternal(name, type, flags));
     }
 
+    @Override
+    public int compareTo(AnnotationTarget o) {
+        FieldInfo other = o.asField();
+        return internal.compareTo(other.internal);
+    }
+
     /**
      * Construct a new mock Field instance.
      *
