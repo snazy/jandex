@@ -558,15 +558,15 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
                     if (hasNext)
                         return true;
 
-                    E[] table = this.sorted;
-                    for (int i = next; i < table.length; i++) {
-                        if (table[i] != null) {
+                    E[] sorted = this.sorted;
+                    for (int i = next; i < sorted.length; i++) {
+                        if (sorted[i] != null) {
                             next = i;
                             return hasNext = true;
                         }
                     }
 
-                    next = table.length;
+                    next = sorted.length;
                     return false;
                 }
 
@@ -594,6 +594,12 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
          * @return 1-based position of {@code e} in the table, or -1 if it is not present
          */
         int positionOf(E e) {
+            if ("org.jboss.jandex.test.EnumConstantsTest$ComplexEnum[] $VALUES 4122 []".equals(e.toString())) {
+                int cmp = ((FieldInternal) sorted[21]).compareTo((FieldInternal) e);
+                System.out.println(cmp);
+            }
+            E[] x = Arrays.copyOfRange(sorted, first, sorted.length);
+            int o = Arrays.binarySearch(x, e, this::compareNullSafe);
             int offset = Arrays.binarySearch(sorted, first, sorted.length, e, this::compareNullSafe);
             if (offset < first) {
                 return -1;
@@ -897,7 +903,7 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
 
         @Override
         StrongInternPool<RecordComponentInternal>.WriteView<RecordComponentInternal> writeView() {
-            return createWriteView(RecordComponentInternal.NAME_COMPARATOR);
+            return createWriteView(Comparator.naturalOrder());
         }
 
         @Override

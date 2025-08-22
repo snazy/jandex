@@ -49,7 +49,11 @@ public abstract class Type implements Descriptor, Comparable<Type> {
         if (r != 0) {
             return r;
         }
-        r = name.compareTo(o.name());
+        r = kind().ordinal() - o.kind().ordinal();
+        if (r != 0) {
+            return r;
+        }
+        r = name.compareTo(o.name);
         if (r != 0) {
             return r;
         }
