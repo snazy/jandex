@@ -624,8 +624,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
         stream.writePackedU32(clazz.annotationsMap().size());
 
         FieldInternal[] fields = clazz.fieldArray();
-        fields = Arrays.copyOf(fields, fields.length);
-        // TODO Arrays.sort(fields, FieldInternal.NAME_COMPARATOR);
+        // TODO fields = Arrays.copyOf(fields, fields.length);
+        // TODO Arrays.sort(fields); - NO NO NO!
         stream.writePackedU32(fields.length);
         for (FieldInternal field : fields) {
             stream.writePackedU32(positionOf(field));
@@ -636,8 +636,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         MethodInternal[] methods = clazz.methodArray();
-        methods = Arrays.copyOf(methods, methods.length);
-        // TODO Arrays.sort(methods, MethodInternal.NAME_AND_PARAMETER_COMPONENT_COMPARATOR);
+        // TODO methods = Arrays.copyOf(methods, methods.length);
+        // TODO Arrays.sort(methods); - NO NO NO!
         stream.writePackedU32(methods.length);
         for (MethodInternal method : methods) {
             stream.writePackedU32(positionOf(method));
@@ -649,8 +649,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
 
         if (version >= 10) {
             RecordComponentInternal[] recordComponents = clazz.recordComponentArray();
-            recordComponents = Arrays.copyOf(recordComponents, recordComponents.length);
-            // TODO Arrays.sort(recordComponents, RecordComponentInternal.NAME_COMPARATOR);
+            // TODO recordComponents = Arrays.copyOf(recordComponents, recordComponents.length);
+            // TODO Arrays.sort(recordComponents); - NO NO NO!
             stream.writePackedU32(recordComponents.length);
             for (RecordComponentInternal recordComponent : recordComponents) {
                 stream.writePackedU32(positionOf(recordComponent));
@@ -660,7 +660,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         List<Entry<DotName, List<AnnotationInstance>>> entries = new ArrayList<>(clazz.annotationsMap().entrySet());
-        // TODO entries.sort(Entry.comparingByKey());
+        entries.sort(Entry.comparingByKey());
         for (Entry<DotName, List<AnnotationInstance>> entry : entries) {
             writeAnnotations(stream, entry.getValue());
         }
@@ -726,7 +726,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeDotNamesSorted(PackedDataOutputStream stream, Collection<DotName> names) throws IOException {
         List<DotName> sorted = new ArrayList<>(names);
         stream.writePackedU32(sorted.size());
-        // TODO sorted.sort(Comparator.comparing(DotName::toString));
+        sorted.sort(Comparator.comparing(DotName::toString));
         for (DotName name : sorted) {
             stream.writePackedU32(positionOf(name));
         }
