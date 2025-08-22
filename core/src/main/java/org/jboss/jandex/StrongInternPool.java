@@ -518,16 +518,7 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
         private final int first;
 
         private int compareNullSafe(E o1, E o2) {
-            if (o1 != null && o2 != null) {
-                return comparator.compare(o1, o2);
-            }
-            if (o1 == null && o2 == null) {
-                return 0;
-            }
-            if (o1 == null) {
-                return -1;
-            }
-            return 1;
+            return Utils.compareNullSafe(o1, o2, comparator);
         }
 
         WriteView(Comparator<E> comparator) {
@@ -595,7 +586,7 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
          */
         int positionOf(E e) {
             if ("org.jboss.jandex.test.EnumConstantsTest$ComplexEnum[] $VALUES 4122 []".equals(e.toString())) {
-                int cmp = ((FieldInternal) sorted[21]).compareTo((FieldInternal) e);
+                int cmp = ((FieldInternal) sorted[19]).compareTo((FieldInternal) e);
                 System.out.println(cmp);
             }
             E[] x = Arrays.copyOfRange(sorted, first, sorted.length);

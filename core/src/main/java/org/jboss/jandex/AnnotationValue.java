@@ -581,6 +581,9 @@ public abstract class AnnotationValue implements Comparable<AnnotationValue> {
 
     @Override
     public final int compareTo(AnnotationValue o) {
+        if (this == o) {
+            return 0;
+        }
         int r = name.compareTo(o.name);
         if (r != 0) {
             return r;

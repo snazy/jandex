@@ -126,7 +126,7 @@ class NameTable {
     }
 
     int positionOf(RecordComponentInternal recordComponentInternal) {
-        return recordComponentPool.index().positionOf(recordComponentInternal);
+        return recordComponentPool.writeView().positionOf(recordComponentInternal);
     }
 
     StrongInternPool<String> stringPool() {

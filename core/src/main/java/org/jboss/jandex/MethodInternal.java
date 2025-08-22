@@ -202,6 +202,10 @@ final class MethodInternal implements Comparable<MethodInternal> {
 
     @Override
     public int compareTo(MethodInternal o) {
+        if (this == o) {
+            // Not just an optimization, but necessary to avoid infinite recursion.
+            return 0;
+        }
         int r = flags - o.flags;
         if (r != 0) {
             return r;
@@ -247,11 +251,11 @@ final class MethodInternal implements Comparable<MethodInternal> {
         if (r != 0) {
             return r;
         }
-        r = e1.receiverType.compareTo(e2.receiverType);
+        r = Utils.compareNullSafe(e1.receiverType, e2.receiverType);
         if (r != 0) {
             return r;
         }
-        r = e1.defaultValue.compareTo(e2.defaultValue);
+        r = Utils.compareNullSafe(e1.defaultValue, e2.defaultValue);
         if (r != 0) {
             return r;
         }

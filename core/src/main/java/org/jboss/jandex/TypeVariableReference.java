@@ -60,6 +60,9 @@ public final class TypeVariableReference extends Type {
 
     @Override
     public int compareTo(Type o) {
+        if (this == o) {
+            return 0;
+        }
         int r = super.compareToBase(o);
         if (r != 0) {
             return r;
@@ -69,10 +72,11 @@ public final class TypeVariableReference extends Type {
         if (r != 0) {
             return r;
         }
-        r = target.compareTo(other.target);
-        if (r != 0) {
-            return r;
-        }
+        // TODO leads to StackOverflowException
+        //        r = target.compareTo(other.target);
+        //        if (r != 0) {
+        //            return r;
+        //        }
         return internalClassName.compareTo(other.internalClassName);
     }
 

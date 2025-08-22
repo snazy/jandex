@@ -85,6 +85,10 @@ final class RecordComponentInternal implements Comparable<RecordComponentInterna
 
     @Override
     public int compareTo(RecordComponentInternal o) {
+        if (this == o) {
+            // Not just an optimization, but necessary to avoid infinite recursion.
+            return 0;
+        }
         int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
         if (r != 0) {
             return r;

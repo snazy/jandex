@@ -199,12 +199,15 @@ public class ParameterizedType extends Type {
 
     @Override
     public int compareTo(Type o) {
+        if (this == o) {
+            return 0;
+        }
         int r = super.compareToBase(o);
         if (r != 0) {
             return r;
         }
         ParameterizedType other = (ParameterizedType) o;
-        r = owner.compareTo(other.owner);
+        r = Utils.compareNullSafe(owner, other.owner);
         if (r != 0) {
             return r;
         }

@@ -93,28 +93,25 @@ final class FieldInternal implements Comparable<FieldInternal> {
 
     @Override
     public int compareTo(FieldInternal o) {
-        System.out.println("Comparing " + this + "\n" +
-                "       to " + o);
+        if (this == o) {
+            // Not just an optimization, but necessary to avoid infinite recursion.
+            return 0;
+        }
         int r = flags - o.flags;
         if (r != 0) {
-            System.out.println("Flags differ: " + flags + " vs " + o.flags + ": " + r);
             return r;
         }
         r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
         if (r != 0) {
-            System.out.println("Name differ: " + new String(name) + " vs " + new String(o.name) + ": " + r);
             return r;
         }
         r = type.compareTo(o.type);
         if (r != 0) {
-            System.out.println("Type differ: " + type + " vs " + o.type + ": " + r);
             return r;
         }
 
         r = Utils.compareArrays(annotations, o.annotations);
         if (r != 0) {
-            System.out.println(
-                    "Annotations differ: " + Arrays.toString(annotations) + " vs " + Arrays.toString(o.annotations) + ": " + r);
             return r;
         }
         return r;

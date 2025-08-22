@@ -310,7 +310,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeRecordComponentTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<RecordComponentInternal> recordComponentPool = names.recordComponentPool();
         stream.writePackedU32(recordComponentPool.size());
-        for (RecordComponentInternal recordComponentInternal : recordComponentPool) {
+        for (RecordComponentInternal recordComponentInternal : recordComponentPool.writeView()) {
             writeRecordComponentEntry(stream, recordComponentInternal);
         }
     }

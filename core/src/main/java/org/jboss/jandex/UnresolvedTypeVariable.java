@@ -38,6 +38,9 @@ public final class UnresolvedTypeVariable extends Type {
 
     @Override
     public int compareTo(Type o) {
+        if (this == o) {
+            return 0;
+        }
         int r = super.compareToBase(o);
         if (r != 0) {
             return r;

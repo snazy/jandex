@@ -55,6 +55,32 @@ class Utils {
         return l1 - l2;
     };
 
+    static <E extends Comparable<E>> int compareNullSafe(E o1, E o2) {
+        if (o1 != null && o2 != null) {
+            return o1.compareTo(o2);
+        }
+        if (o1 == null && o2 == null) {
+            return 0;
+        }
+        if (o1 == null) {
+            return -1;
+        }
+        return 1;
+    }
+
+    static <E> int compareNullSafe(E o1, E o2, Comparator<E> comparator) {
+        if (o1 != null && o2 != null) {
+            return comparator.compare(o1, o2);
+        }
+        if (o1 == null && o2 == null) {
+            return 0;
+        }
+        if (o1 == null) {
+            return -1;
+        }
+        return 1;
+    }
+
     // Replace with `Arrays.compare(O[], O)` (since Java 9)
     static <E extends Comparable<E>> int compareArrays(E[] arr1, E[] arr2) {
         if (arr1 == null && arr2 == null) {

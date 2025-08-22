@@ -130,6 +130,9 @@ public final class ClassType extends Type {
 
     @Override
     public int compareTo(Type o) {
+        if (this == o) {
+            return 0;
+        }
         return super.compareToBase(o);
     }
 
