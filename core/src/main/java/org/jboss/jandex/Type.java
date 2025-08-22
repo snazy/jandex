@@ -179,6 +179,7 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * @param kind the kind of type to create; must not be {@code null}
      * @return the type
      * @throws java.lang.IllegalArgumentException if the {@code kind} is not supported
+     *
      */
     public static Type create(DotName name, Kind kind) {
         if (name == null) {
@@ -312,7 +313,7 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * TypeArgument -> ReferenceType | WildcardType
      * WildcardType -> '?' | '?' ('extends' | 'super') ReferenceType
      * </pre>
-     * <p>
+     *
      * Notice that the resulting type never contains type variables, only "proper" types.
      * Also notice that the grammar above does not support all kinds of nested types;
      * it should be possible to add that later, if there's an actual need.
@@ -512,8 +513,8 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * @return immutable list of annotation instances, never {@code null}
      * @throws IllegalArgumentException if the index is {@code null}, if the index does not contain the annotation type
      *         or if {@code name} does not identify an annotation type
-     * @see #annotations()
      * @since 3.0
+     * @see #annotations()
      */
     public final List<AnnotationInstance> annotationsWithRepeatable(DotName name, IndexView index) {
         if (index == null) {

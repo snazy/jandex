@@ -452,11 +452,11 @@ public final class AnnotationInstance implements Comparable<AnnotationInstance> 
 
     @Override
     public int compareTo(AnnotationInstance o) {
-        int r = name().compareTo(o.name());
+        int r = name.compareTo(o.name);
         if (r != 0) {
             return r;
         }
-        r = target().compareTo(o.target());
+        r = target.compareTo(o.target);
         if (r != 0) {
             return r;
         }

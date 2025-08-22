@@ -581,7 +581,7 @@ public abstract class AnnotationValue implements Comparable<AnnotationValue> {
 
     @Override
     public final int compareTo(AnnotationValue o) {
-        int r = name().compareTo(o.name());
+        int r = name.compareTo(o.name);
         if (r != 0) {
             return r;
         }
@@ -1219,7 +1219,7 @@ public abstract class AnnotationValue implements Comparable<AnnotationValue> {
         @Override
         int compareToSpecial(AnnotationValue o) {
             ClassValue other = (ClassValue) o;
-            return type.name().compareTo(other.type.name());
+            return type.compareTo(other.type);
         }
 
         public Type value() {
