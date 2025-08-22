@@ -38,33 +38,6 @@ final class FieldInternal implements Comparable<FieldInternal> {
 
     static final Comparator<FieldInternal> NAME_COMPARATOR = new NameComparator();
 
-    @Override
-    public int compareTo(FieldInternal o) {
-        int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
-        if (r != 0) {
-            return r;
-        }
-        r = flags - o.flags;
-        if (r != 0) {
-            return r;
-        }
-        r = Type.TYPE_WRITE_COMPARATOR.compare(type, o.type);
-        if (r != 0) {
-            return r;
-        }
-
-        int l1 = annotations == null ? 0 : annotations.length;
-        int l2 = o.annotations == null ? 0 : o.annotations.length;
-        int l = Math.min(l1, l2);
-        for (int i = 0; i < l; i++) {
-            r = annotations[i].compareTo(o.annotations[i]);
-            if (r != 0) {
-                return r;
-            }
-        }
-        return l1 - l2;
-    }
-
     static class NameComparator implements Comparator<FieldInternal> {
         public int compare(FieldInternal instance, FieldInternal instance2) {
             return BYTE_ARRAY_COMPARATOR.compare(instance.name, instance2.name); //instance.name.compareTo(instance2.name);
@@ -116,6 +89,33 @@ final class FieldInternal implements Comparable<FieldInternal> {
         result = 31 * result + (int) flags;
         result = 31 * result + Arrays.hashCode(annotations);
         return result;
+    }
+
+    @Override
+    public int compareTo(FieldInternal o) {
+        int r = flags - o.flags;
+        if (r != 0) {
+            return r;
+        }
+        r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
+        if (r != 0) {
+            return r;
+        }
+        r = type.compareTo(o.type);
+        if (r != 0) {
+            return r;
+        }
+
+        int l1 = annotations == null ? 0 : annotations.length;
+        int l2 = o.annotations == null ? 0 : o.annotations.length;
+        int l = Math.min(l1, l2);
+        for (int i = 0; i < l; i++) {
+            r = annotations[i].compareTo(o.annotations[i]);
+            if (r != 0) {
+                return r;
+            }
+        }
+        return l1 - l2;
     }
 
     boolean internEquals(Object o) {

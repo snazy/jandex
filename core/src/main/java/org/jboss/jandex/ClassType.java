@@ -129,6 +129,11 @@ public final class ClassType extends Type {
     }
 
     @Override
+    public int compareTo(Type o) {
+        return super.compareToBase(o);
+    }
+
+    @Override
     Type copyType(AnnotationInstance[] newAnnotations) {
         return new ClassType(name(), newAnnotations);
     }

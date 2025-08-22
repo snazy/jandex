@@ -19,6 +19,7 @@ package org.jboss.jandex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -103,6 +104,20 @@ public final class TypeVariable extends Type {
         this.identifier = name;
         this.bounds = bounds;
         this.hash = implicitObjectBound ? Integer.MIN_VALUE : 0;
+    }
+
+    @Override
+    public int compareTo(Type o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        TypeVariable other = (TypeVariable) o;
+        r = identifier.compareTo(other.identifier);
+        if (r != 0) {
+            return r;
+        }
+        return Utils.compareArrays(bounds, other.bounds, Comparator.naturalOrder());
     }
 
     @Override

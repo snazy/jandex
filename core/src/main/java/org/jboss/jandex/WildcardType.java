@@ -121,6 +121,20 @@ public class WildcardType extends Type {
     }
 
     @Override
+    public int compareTo(Type o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        WildcardType other = (WildcardType) o;
+        r = bound.compareTo(other.bound);
+        if (r != 0) {
+            return r;
+        }
+        return Boolean.compare(isExtends, other.isExtends);
+    }
+
+    @Override
     public DotName name() {
         if (isExtends && bound != null) {
             return bound.name();

@@ -118,7 +118,7 @@ class NameTable {
     }
 
     int positionOf(FieldInternal fieldInternal) {
-        return fieldPool.writeView().positionOf(fieldInternal);
+        return fieldPool.index().positionOf(fieldInternal);
     }
 
     RecordComponentInternal intern(RecordComponentInternal recordComponentInternal) {

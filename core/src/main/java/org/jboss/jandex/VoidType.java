@@ -42,6 +42,11 @@ public class VoidType extends Type {
     }
 
     @Override
+    public int compareTo(Type o) {
+        return super.compareToBase(o);
+    }
+
+    @Override
     Type copyType(AnnotationInstance[] newAnnotations) {
         return new VoidType(newAnnotations);
     }

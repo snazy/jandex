@@ -19,6 +19,7 @@ package org.jboss.jandex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -195,6 +196,20 @@ public class ParameterizedType extends Type {
         super(name, annotations);
         this.arguments = arguments == null ? EMPTY_ARRAY : arguments;
         this.owner = owner;
+    }
+
+    @Override
+    public int compareTo(Type o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        ParameterizedType other = (ParameterizedType) o;
+        r = owner.compareTo(other.owner);
+        if (r != 0) {
+            return r;
+        }
+        return Utils.compareArrays(arguments, other.arguments, Comparator.naturalOrder());
     }
 
     /**

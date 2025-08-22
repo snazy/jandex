@@ -111,6 +111,11 @@ public final class PrimitiveType extends Type {
     }
 
     @Override
+    public int compareTo(Type o) {
+        return super.compareToBase(o);
+    }
+
+    @Override
     public Kind kind() {
         return Kind.PRIMITIVE;
     }

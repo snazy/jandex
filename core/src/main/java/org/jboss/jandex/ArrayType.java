@@ -133,6 +133,20 @@ public final class ArrayType extends Type {
         }
     }
 
+    @Override
+    public int compareTo(Type o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        ArrayType other = (ArrayType) o;
+        r = constituent.compareTo(other.constituent);
+        if (r != 0) {
+            return r;
+        }
+        return Integer.compare(dimensions, other.dimensions);
+    }
+
     // precomputes the array type name for single-dimensional arrays of primitive types and `java.*` class types
     // the names of arrays of primitive types and a few common `java.*` class types are cached
     // if the array type is not common, this method returns `DotName.OBJECT_NAME`, which is later checked by `name()`

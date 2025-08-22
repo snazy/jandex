@@ -36,6 +36,16 @@ public final class UnresolvedTypeVariable extends Type {
         this.name = name;
     }
 
+    @Override
+    public int compareTo(Type o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        UnresolvedTypeVariable other = (UnresolvedTypeVariable) o;
+        return name.compareTo(other.name);
+    }
+
     /**
      * Returns the identifier of this unresolved type variable as it appears in Java source code.
      * <p>

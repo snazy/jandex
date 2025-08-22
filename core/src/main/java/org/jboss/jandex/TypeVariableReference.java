@@ -59,6 +59,24 @@ public final class TypeVariableReference extends Type {
     }
 
     @Override
+    public int compareTo(Type o) {
+        int r = super.compareToBase(o);
+        if (r != 0) {
+            return r;
+        }
+        TypeVariableReference other = (TypeVariableReference) o;
+        r = name.compareTo(other.name);
+        if (r != 0) {
+            return r;
+        }
+        r = target.compareTo(other.target);
+        if (r != 0) {
+            return r;
+        }
+        return internalClassName.compareTo(other.internalClassName);
+    }
+
+    @Override
     public DotName name() {
         if (target == null) {
             throw new IllegalStateException("Type variable reference " + name + " was not patched correctly");
