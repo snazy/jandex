@@ -21,7 +21,6 @@ package org.jboss.jandex;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -46,15 +45,15 @@ public abstract class Type implements Descriptor, Comparable<Type> {
     private final AnnotationInstance[] annotations;
 
     int compareToBase(Type o) {
-        int r = name.compareTo(o.name());
+        int r = kind().sortOrder - o.kind().sortOrder;
         if (r != 0) {
             return r;
         }
-        r = kind().sortOrder - o.kind().sortOrder;
+        r = name.compareTo(o.name());
         if (r != 0) {
             return r;
         }
-        return Utils.compareArrays(annotations, o.annotations, Comparator.naturalOrder());
+        return Utils.compareArrays(annotations, o.annotations);
     }
 
     /**
@@ -63,10 +62,14 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * @author Jason T. Greene
      */
     public enum Kind {
-        /** A Java class, interface, or annotation */
+        /**
+         * A Java class, interface, or annotation
+         */
         CLASS(2),
 
-        /** A Java array */
+        /**
+         * A Java array
+         */
         ARRAY(3),
 
         /**
@@ -74,10 +77,14 @@ public abstract class Type implements Descriptor, Comparable<Type> {
          */
         PRIMITIVE(1),
 
-        /** Used to designate a Java method that returns nothing */
+        /**
+         * Used to designate a Java method that returns nothing
+         */
         VOID(0),
 
-        /** A resolved generic type parameter or type argument */
+        /**
+         * A resolved generic type parameter or type argument
+         */
         TYPE_VARIABLE(4),
 
         /**
@@ -87,13 +94,19 @@ public abstract class Type implements Descriptor, Comparable<Type> {
          */
         UNRESOLVED_TYPE_VARIABLE(5),
 
-        /** A generic wildcard type */
+        /**
+         * A generic wildcard type
+         */
         WILDCARD_TYPE(6),
 
-        /** A generic parameterized type */
+        /**
+         * A generic parameterized type
+         */
         PARAMETERIZED_TYPE(7),
 
-        /** A reference to a resolved type variable occuring in the bound of a recursive type parameter */
+        /**
+         * A reference to a resolved type variable occuring in the bound of a recursive type parameter
+         */
         TYPE_VARIABLE_REFERENCE(8),
 
         ;
@@ -162,7 +175,6 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * @param kind the kind of type to create; must not be {@code null}
      * @return the type
      * @throws java.lang.IllegalArgumentException if the {@code kind} is not supported
-     *
      */
     public static Type create(DotName name, Kind kind) {
         if (name == null) {
@@ -296,7 +308,7 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * TypeArgument -> ReferenceType | WildcardType
      * WildcardType -> '?' | '?' ('extends' | 'super') ReferenceType
      * </pre>
-     *
+     * <p>
      * Notice that the resulting type never contains type variables, only "proper" types.
      * Also notice that the grammar above does not support all kinds of nested types;
      * it should be possible to add that later, if there's an actual need.
@@ -496,8 +508,8 @@ public abstract class Type implements Descriptor, Comparable<Type> {
      * @return immutable list of annotation instances, never {@code null}
      * @throws IllegalArgumentException if the index is {@code null}, if the index does not contain the annotation type
      *         or if {@code name} does not identify an annotation type
-     * @since 3.0
      * @see #annotations()
+     * @since 3.0
      */
     public final List<AnnotationInstance> annotationsWithRepeatable(DotName name, IndexView index) {
         if (index == null) {

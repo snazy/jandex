@@ -214,7 +214,7 @@ final class MethodInternal implements Comparable<MethodInternal> {
         if (r != 0) {
             return r;
         }
-        r = Utils.compareArrays(parameterTypes, o.parameterTypes, Comparator.naturalOrder());
+        r = Utils.compareArrays(parameterTypes, o.parameterTypes);
         if (r != 0) {
             return r;
         }
@@ -222,11 +222,11 @@ final class MethodInternal implements Comparable<MethodInternal> {
         if (r != 0) {
             return r;
         }
-        r = Utils.compareArrays(exceptions, o.exceptions, Comparator.naturalOrder());
+        r = Utils.compareArrays(exceptions, o.exceptions);
         if (r != 0) {
             return r;
         }
-        r = Utils.compareArrays(descriptorParameterTypes, o.descriptorParameterTypes, Comparator.naturalOrder());
+        r = Utils.compareArrays(descriptorParameterTypes, o.descriptorParameterTypes);
         if (r != 0) {
             return r;
         }
@@ -243,7 +243,7 @@ final class MethodInternal implements Comparable<MethodInternal> {
             return 1;
         }
 
-        r = Utils.compareArrays(e1.annotations, e2.annotations, Comparator.naturalOrder());
+        r = Utils.compareArrays(e1.annotations, e2.annotations);
         if (r != 0) {
             return r;
         }
@@ -255,7 +255,7 @@ final class MethodInternal implements Comparable<MethodInternal> {
         if (r != 0) {
             return r;
         }
-        r = Utils.compareArrays(e1.typeParameters, e2.typeParameters, Comparator.naturalOrder());
+        r = Utils.compareArrays(e1.typeParameters, e2.typeParameters);
         return r;
     }
 

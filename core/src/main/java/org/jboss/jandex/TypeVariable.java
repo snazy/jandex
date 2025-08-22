@@ -19,7 +19,6 @@ package org.jboss.jandex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -117,7 +116,7 @@ public final class TypeVariable extends Type {
         if (r != 0) {
             return r;
         }
-        return Utils.compareArrays(bounds, other.bounds, Comparator.naturalOrder());
+        return Utils.compareArrays(bounds, other.bounds);
     }
 
     @Override

@@ -50,27 +50,6 @@ public final class AnnotationInstance implements Comparable<AnnotationInstance> 
     private final AnnotationValue[] values;
     private final boolean runtimeVisible;
 
-    @Override
-    public int compareTo(AnnotationInstance o) {
-        int r = name().compareTo(o.name());
-        if (r != 0) {
-            return r;
-        }
-        // not comparing 'target' as that will lead to an endless recursion
-        AnnotationValue[] values1 = values;
-        AnnotationValue[] values2 = o.values;
-        int l1 = values1.length;
-        int l2 = values2.length;
-        int l = Math.min(l1, l2);
-        for (int i = 0; i < l; i++) {
-            r = values1[i].compareTo(values2[i]);
-            if (r != 0) {
-                return r;
-            }
-        }
-        return l1 - l2;
-    }
-
     static class NameComparator implements Comparator<AnnotationInstance> {
         public int compare(AnnotationInstance instance1, AnnotationInstance instance2) {
             return instance1.name().compareTo(instance2.name());
@@ -469,6 +448,19 @@ public final class AnnotationInstance implements Comparable<AnnotationInstance> 
         AnnotationInstance instance = (AnnotationInstance) o;
 
         return target == instance.target && name.equals(instance.name) && Arrays.equals(values, instance.values);
+    }
+
+    @Override
+    public int compareTo(AnnotationInstance o) {
+        int r = name().compareTo(o.name());
+        if (r != 0) {
+            return r;
+        }
+        r = target().compareTo(o.target());
+        if (r != 0) {
+            return r;
+        }
+        return Utils.compareArrays(values, o.values);
     }
 
     /**

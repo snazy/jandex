@@ -93,17 +93,7 @@ final class RecordComponentInternal implements Comparable<RecordComponentInterna
         if (r != 0) {
             return r;
         }
-
-        int l1 = annotations == null ? 0 : annotations.length;
-        int l2 = o.annotations == null ? 0 : o.annotations.length;
-        int l = Math.min(l1, l2);
-        for (int i = 0; i < l; i++) {
-            r = annotations[i].compareTo(o.annotations[i]);
-            if (r != 0) {
-                return r;
-            }
-        }
-        return l1 - l2;
+        return Utils.compareArrays(annotations, o.annotations);
     }
 
     boolean internEquals(Object o) {

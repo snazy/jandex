@@ -44,11 +44,11 @@ public final class MethodParameterInfo implements Declaration {
     @Override
     public int compareTo(AnnotationTarget o) {
         MethodParameterInfo other = o.asMethodParameter();
-        int r = method.compareTo(other.method);
+        int r = position - other.position;
         if (r != 0) {
             return r;
         }
-        return position - other.position;
+        return method.compareTo(other.method);
     }
 
     /**

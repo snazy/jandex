@@ -36,7 +36,7 @@ package org.jboss.jandex;
  * @author Jason T. Greene
  */
 public class EmptyTypeTarget extends TypeTarget {
-    private boolean receiver;
+    private final boolean receiver;
 
     EmptyTypeTarget(AnnotationTarget enclosingTarget, boolean receiver) {
         super(enclosingTarget);

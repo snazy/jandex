@@ -19,7 +19,6 @@ package org.jboss.jandex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -209,7 +208,7 @@ public class ParameterizedType extends Type {
         if (r != 0) {
             return r;
         }
-        return Utils.compareArrays(arguments, other.arguments, Comparator.naturalOrder());
+        return Utils.compareArrays(arguments, other.arguments);
     }
 
     /**

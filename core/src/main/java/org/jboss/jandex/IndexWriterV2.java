@@ -235,7 +235,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
     }
 
     private void writeUsersTable(PackedDataOutputStream stream, Map<DotName, ClassInfo[]> users) throws IOException {
-        // TODO users = new TreeMap<>(users);
+        users = new TreeMap<>(users);
         for (Entry<DotName, ClassInfo[]> entry : users.entrySet()) {
             writeUsersSet(stream, entry.getKey(), entry.getValue());
         }
@@ -245,7 +245,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
         stream.writePackedU32(positionOf(user));
         stream.writePackedU32(uses.length);
         uses = Arrays.copyOf(uses, uses.length);
-        // TODO Arrays.sort(uses, Comparator.comparing(ClassInfo::name));
+        Arrays.sort(uses, Comparator.comparing(ClassInfo::name));
         for (ClassInfo use : uses) {
             stream.writePackedU32(positionOf(use.name()));
         }
@@ -545,7 +545,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
         int size = classes.size();
         stream.writePackedU32(size);
         List<ClassInfo> sorted = new ArrayList<>(classes);
-        // TODO sorted.sort(Comparator.comparing(ClassInfo::name));
+        sorted.sort(Comparator.comparing(ClassInfo::name));
         for (ClassInfo clazz : sorted) {
             writeClassEntry(stream, clazz);
         }
@@ -557,7 +557,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
         addClassName(DotName.createSimple("module-info"));
 
         List<ModuleInfo> sorted = new ArrayList<>(modules);
-        // TODO sorted.sort(Comparator.comparing(ModuleInfo::name));
+        sorted.sort(Comparator.comparing(ModuleInfo::name));
         for (ModuleInfo module : sorted) {
             writeClassEntry(stream, module.moduleInfoClass());
             writeModuleEntry(stream, module);
@@ -944,9 +944,16 @@ final class IndexWriterV2 extends IndexWriterImpl {
             }
         }
 
-        // TODO typeTable.sort(Type.TYPE_NAME_WRITE_COMPARATOR);
-        // TODO typeListTable.sort(Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR);
-        // TODO annotationTable.sort(AnnotationInstance.NAME_COMPARATOR);
+        typeTable.sort(Comparator.naturalOrder());
+        typeListTable.sort(
+                // TODO utils method ?
+                new Comparator<Type[]>() {
+                    @Override
+                    public int compare(Type[] o1, Type[] o2) {
+                        return Utils.compareArrays(o1, o2);
+                    }
+                });
+        annotationTable.sort(AnnotationInstance.NAME_COMPARATOR);
     }
 
     private void addClass(ClassInfo clazz) {

@@ -1317,16 +1317,7 @@ public abstract class AnnotationValue implements Comparable<AnnotationValue> {
         @Override
         int compareToSpecial(AnnotationValue o) {
             ArrayValue other = (ArrayValue) o;
-            int l1 = value.length;
-            int l2 = other.value.length;
-            int l = Math.min(l1, l2);
-            for (int i = 0; i < l; i++) {
-                int r = value[i].compareTo(other.value[i]);
-                if (r != 0) {
-                    return r;
-                }
-            }
-            return 0;
+            return Utils.compareArrays(value, other.value);
         }
 
         public AnnotationValue[] value() {
