@@ -48,7 +48,7 @@ final class FieldInternal implements Comparable<FieldInternal> {
         if (r != 0) {
             return r;
         }
-        r = Type.TYPE_NAME_WRITE_COMPARATOR.compare(type, o.type);
+        r = Type.TYPE_WRITE_COMPARATOR.compare(type, o.type);
         if (r != 0) {
             return r;
         }

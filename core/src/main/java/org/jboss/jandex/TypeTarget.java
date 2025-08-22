@@ -51,7 +51,7 @@ public abstract class TypeTarget implements AnnotationTarget {
         if (r != 0) {
             return r;
         }
-        return Type.TYPE_NAME_WRITE_COMPARATOR.compare(target, other.target);
+        return Type.TYPE_WRITE_COMPARATOR.compare(target, other.target);
     }
 
     /** Specifies a form of usage of a type annotation */

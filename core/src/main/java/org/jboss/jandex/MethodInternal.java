@@ -34,27 +34,6 @@ final class MethodInternal implements Comparable<MethodInternal> {
     static final NameAndParameterComponentComparator NAME_AND_PARAMETER_COMPONENT_COMPARATOR = new NameAndParameterComponentComparator();
     static final byte[][] EMPTY_PARAMETER_NAMES = new byte[0][];
 
-    @Override
-    public int compareTo(MethodInternal o) {
-        int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
-        if (r != 0) {
-            return r;
-        }
-        r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(parameterTypes, o.parameterTypes);
-        if (r != 0) {
-            return r;
-        }
-        r = Type.TYPE_NAME_WRITE_COMPARATOR.compare(returnType, o.returnType);
-        if (r != 0) {
-            return r;
-        }
-        r = Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR.compare(exceptions, o.exceptions);
-        if (r != 0) {
-            return r;
-        }
-        return flags - o.flags;
-    }
-
     private static class NameAndParameterComponentComparator implements Comparator<MethodInternal> {
         public int compare(MethodInternal instance, MethodInternal instance2) {
             int x = BYTE_ARRAY_COMPARATOR.compare(instance.name, instance2.name);
@@ -104,6 +83,65 @@ final class MethodInternal implements Comparable<MethodInternal> {
     private ExtraInfo extra;
 
     private final Type[] descriptorParameterTypes;
+
+    @Override
+    public int compareTo(MethodInternal o) {
+        int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
+        if (r != 0) {
+            return r;
+        }
+        r = Utils.compareArrays(parameterNames, o.parameterNames, BYTE_ARRAY_COMPARATOR);
+        if (r != 0) {
+            return r;
+        }
+        r = Utils.compareArrays(parameterTypes, o.parameterTypes, Type.TYPE_WRITE_COMPARATOR);
+        if (r != 0) {
+            return r;
+        }
+        r = Type.TYPE_WRITE_COMPARATOR.compare(returnType, o.returnType);
+        if (r != 0) {
+            return r;
+        }
+        r = Utils.compareArrays(exceptions, o.exceptions, Type.TYPE_WRITE_COMPARATOR);
+        if (r != 0) {
+            return r;
+        }
+        r = flags - o.flags;
+        if (r != 0) {
+            return r;
+        }
+        r = Utils.compareArrays(descriptorParameterTypes, o.descriptorParameterTypes, Type.TYPE_WRITE_COMPARATOR);
+        if (r != 0) {
+            return r;
+        }
+
+        ExtraInfo e1 = extra;
+        ExtraInfo e2 = o.extra;
+        if (e1 == null && e2 == null) {
+            return 0;
+        }
+        if (e1 == null) {
+            return -1;
+        }
+        if (e2 == null) {
+            return 1;
+        }
+
+        r = Utils.compareArrays(e1.annotations, e2.annotations, Comparator.naturalOrder());
+        if (r != 0) {
+            return r;
+        }
+        r = Type.TYPE_WRITE_COMPARATOR.compare(e1.receiverType, e2.receiverType);
+        if (r != 0) {
+            return r;
+        }
+        r = e1.defaultValue.compareTo(e2.defaultValue);
+        if (r != 0) {
+            return r;
+        }
+        r = Utils.compareArrays(e1.typeParameters, e2.typeParameters, Type.TYPE_WRITE_COMPARATOR);
+        return r;
+    }
 
     MethodInternal(byte[] name, byte[][] parameterNames, Type[] parameterTypes, Type returnType, short flags) {
         this(name, parameterNames, parameterTypes, returnType, flags, Type.EMPTY_ARRAY, Type.EMPTY_ARRAY);

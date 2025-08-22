@@ -806,7 +806,7 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
 
         @Override
         StrongInternPool<Type>.WriteView<Type> writeView() {
-            return createWriteView(Type.TYPE_NAME_WRITE_COMPARATOR);
+            return createWriteView(Type.TYPE_WRITE_COMPARATOR);
         }
 
         @Override
@@ -827,7 +827,13 @@ abstract class StrongInternPool<E> implements Cloneable, Serializable, Iterable<
 
         @Override
         StrongInternPool<Type[]>.WriteView<Type[]> writeView() {
-            return createWriteView(Type.TYPE_ARRAY_NAME_WRITE_COMPARATOR);
+            return createWriteView(
+                    new Comparator<Type[]>() {
+                        @Override
+                        public int compare(Type[] o1, Type[] o2) {
+                            return Utils.compareArrays(o1, o2, Type.TYPE_WRITE_COMPARATOR);
+                        }
+                    });
         }
 
         @Override

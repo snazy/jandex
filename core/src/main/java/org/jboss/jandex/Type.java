@@ -41,8 +41,7 @@ import java.util.function.Function;
  */
 public abstract class Type implements Descriptor {
     public static final Type[] EMPTY_ARRAY = new Type[0];
-    public static final Comparator<Type> TYPE_NAME_WRITE_COMPARATOR = new TypeWriteComparator();
-    public static final Comparator<Type[]> TYPE_ARRAY_NAME_WRITE_COMPARATOR = new TypeArrayNameWriteComparator();
+    public static final Comparator<Type> TYPE_WRITE_COMPARATOR = new TypeWriteComparator();
     private static final AnnotationInstance[] EMPTY_ANNOTATIONS = new AnnotationInstance[0];
     private final DotName name;
     private final AnnotationInstance[] annotations;
@@ -58,23 +57,6 @@ public abstract class Type implements Descriptor {
     static class TypeWriteComparator implements Comparator<Type> {
         public int compare(Type instance1, Type instance2) {
             return compareForWrite(instance1, instance2);
-        }
-    }
-
-    static class TypeArrayNameWriteComparator implements Comparator<Type[]> {
-        public int compare(Type[] instance1, Type[] instance2) {
-            int l1 = instance1.length;
-            int l2 = instance2.length;
-            int l = Math.min(l1, l2);
-            for (int i = 0; i < l; i++) {
-                Type i1 = instance1[i];
-                Type i2 = instance2[i];
-                int r = compareForWrite(i1, i2);
-                if (r != 0) {
-                    return r;
-                }
-            }
-            return l1 - l2;
         }
     }
 

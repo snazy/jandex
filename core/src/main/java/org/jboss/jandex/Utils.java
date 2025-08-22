@@ -55,6 +55,29 @@ class Utils {
         return l1 - l2;
     };
 
+    // Replace with `Arrays.compare(O[], O[], Comparator)` (since Java 9)
+    static <E> int compareArrays(E[] arr1, E[] arr2, Comparator<E> comparator) {
+        if (arr1 == null && arr2 == null) {
+            return 0;
+        }
+        if (arr1 == null) {
+            return -1;
+        }
+        if (arr2 == null) {
+            return 1;
+        }
+        int l1 = arr1.length;
+        int l2 = arr2.length;
+        int l = Math.min(l1, l2);
+        for (int i = 0; i < l; i++) {
+            int r = comparator.compare(arr1[i], arr2[i]);
+            if (r != 0) {
+                return r;
+            }
+        }
+        return 0;
+    }
+
     static byte[] toUTF8(String string) {
         return string.getBytes(StandardCharsets.UTF_8);
     }

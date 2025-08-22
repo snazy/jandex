@@ -35,12 +35,25 @@ final class RecordComponentInternal implements Comparable<RecordComponentInterna
 
     @Override
     public int compareTo(RecordComponentInternal o) {
-        // TODO delegate to NAME_COMPARATOR?
         int r = BYTE_ARRAY_COMPARATOR.compare(name, o.name);
         if (r != 0) {
             return r;
         }
-        return 0;
+        r = Type.TYPE_WRITE_COMPARATOR.compare(type, o.type);
+        if (r != 0) {
+            return r;
+        }
+
+        int l1 = annotations == null ? 0 : annotations.length;
+        int l2 = o.annotations == null ? 0 : o.annotations.length;
+        int l = Math.min(l1, l2);
+        for (int i = 0; i < l; i++) {
+            r = annotations[i].compareTo(o.annotations[i]);
+            if (r != 0) {
+                return r;
+            }
+        }
+        return l1 - l2;
     }
 
     static final NameComparator NAME_COMPARATOR = new NameComparator();
