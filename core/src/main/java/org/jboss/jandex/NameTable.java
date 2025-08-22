@@ -110,7 +110,7 @@ class NameTable {
     }
 
     int positionOf(MethodInternal methodInternal) {
-        return methodPool.index().positionOf(methodInternal);
+        return methodPool.writeView().positionOf(methodInternal);
     }
 
     FieldInternal intern(FieldInternal fieldInternal) {

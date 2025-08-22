@@ -294,7 +294,8 @@ final class IndexWriterV2 extends IndexWriterImpl {
     private void writeMethodTable(PackedDataOutputStream stream) throws IOException {
         StrongInternPool<MethodInternal> methodPool = names.methodPool();
         stream.writePackedU32(methodPool.size());
-        for (MethodInternal methodInternal : methodPool) {
+        for (MethodInternal methodInternal : methodPool.writeView()) {
+            System.out.println(methodInternal);
             writeMethodEntry(stream, methodInternal);
         }
     }
@@ -624,8 +625,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
         stream.writePackedU32(clazz.annotationsMap().size());
 
         FieldInternal[] fields = clazz.fieldArray();
-        // TODO fields = Arrays.copyOf(fields, fields.length);
-        // TODO Arrays.sort(fields); - NO NO NO!
+        // Do NOT sort record components
         stream.writePackedU32(fields.length);
         for (FieldInternal field : fields) {
             stream.writePackedU32(positionOf(field));
@@ -636,8 +636,9 @@ final class IndexWriterV2 extends IndexWriterImpl {
         }
 
         MethodInternal[] methods = clazz.methodArray();
-        // TODO methods = Arrays.copyOf(methods, methods.length);
-        // TODO Arrays.sort(methods); - NO NO NO!
+        // TODO sort?
+        //        methods = Arrays.copyOf(methods, methods.length);
+        //        Arrays.sort(methods);
         stream.writePackedU32(methods.length);
         for (MethodInternal method : methods) {
             stream.writePackedU32(positionOf(method));
@@ -649,8 +650,7 @@ final class IndexWriterV2 extends IndexWriterImpl {
 
         if (version >= 10) {
             RecordComponentInternal[] recordComponents = clazz.recordComponentArray();
-            // TODO recordComponents = Arrays.copyOf(recordComponents, recordComponents.length);
-            // TODO Arrays.sort(recordComponents); - NO NO NO!
+            // Do NOT sort record components
             stream.writePackedU32(recordComponents.length);
             for (RecordComponentInternal recordComponent : recordComponents) {
                 stream.writePackedU32(positionOf(recordComponent));
